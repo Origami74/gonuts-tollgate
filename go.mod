@@ -1,4 +1,4 @@
-module github.com/elnosh/gonuts
+module github.com/Origami74/gonuts-tollgate
 
 go 1.23.7
 
