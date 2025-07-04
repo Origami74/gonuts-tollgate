@@ -139,12 +139,21 @@ func LoadWallet(config Config) (*Wallet, error) {
 		// if mint is new, add it
 		_, err := wallet.AddMint(mintURL)
 		if err != nil {
+			if isNetworkError(err) {
+				// Cannot add new mint offline - this is expected
+				// The mint will be added when back online
+				return wallet, nil
+			}
 			return nil, fmt.Errorf("error adding new mint: %v", err)
 		}
 	} else {
 		// if mint is known, check if active keyset has changed
 		_, err := wallet.getActiveKeyset(mintURL)
 		if err != nil {
+			if isNetworkError(err) {
+				// Cannot check keyset updates offline - continue with cached data
+				return wallet, nil
+			}
 			return nil, err
 		}
 	}
@@ -167,11 +176,17 @@ func (w *Wallet) AddMint(mint string) (*walletMint, error) {
 
 	activeKeyset, err := GetMintActiveKeyset(mintURL, w.unit)
 	if err != nil {
+		if isNetworkError(err) {
+			return nil, fmt.Errorf("cannot add new mint while offline: %v", err)
+		}
 		return nil, err
 	}
 
 	inactiveKeysets, err := GetMintInactiveKeysets(mintURL, w.unit)
 	if err != nil {
+		if isNetworkError(err) {
+			return nil, fmt.Errorf("cannot fetch inactive keysets while offline: %v", err)
+		}
 		return nil, err
 	}
 
@@ -426,6 +441,46 @@ func (w *Wallet) Send(amount uint64, mintURL string, includeFees bool) (cashu.Pr
 	}
 
 	return proofsToSend, nil
+}
+
+// SendWithOptions provides enhanced send functionality with configurable options
+func (w *Wallet) SendWithOptions(amount uint64, mintURL string, options SendOptions) (*SendResult, error) {
+	selectedMint, ok := w.mints[mintURL]
+	if !ok {
+		return nil, ErrMintNotExist
+	}
+
+	w.mu.Lock()
+	defer w.mu.Unlock()
+
+	// Try to get exact amount first
+	proofsToSend, err := w.getProofsForAmountWithOptions(amount, &selectedMint, options)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := w.db.AddPendingProofs(proofsToSend); err != nil {
+		return nil, fmt.Errorf("could not save proofs to pending: %v", err)
+	}
+
+	actualAmount := proofsToSend.Amount()
+	return &SendResult{
+		Proofs:          proofsToSend,
+		RequestedAmount: amount,
+		ActualAmount:    actualAmount,
+		Overpayment:     actualAmount - amount,
+		WasOffline:      !checkConnectivity(mintURL),
+	}, nil
+}
+
+// SendOffline attempts to send the closest amount above the requested amount when exact change isn't available
+func (w *Wallet) SendOffline(amount uint64, mintURL string, maxOverpayment uint64) (*SendResult, error) {
+	options := SendOptions{
+		IncludeFees:            true,
+		AllowOverpayment:       true,
+		MaxOverpaymentAbsolute: maxOverpayment,
+	}
+	return w.SendWithOptions(amount, mintURL, options)
 }
 
 // SendToPubkey returns proofs that are locked to the passed pubkey
@@ -1467,6 +1522,72 @@ func (w *Wallet) swapToSend(
 	return proofsToSend, nil
 }
 
+// getProofsForAmountWithOptions gets proofs for amount with configurable options including overpayment
+func (w *Wallet) getProofsForAmountWithOptions(
+	amount uint64,
+	mint *walletMint,
+	options SendOptions,
+) (cashu.Proofs, error) {
+	selectedProofs, err := w.selectProofsForAmount(amount, mint, options.IncludeFees)
+	if err != nil {
+		return nil, err
+	}
+
+	var fees uint64 = 0
+	if options.IncludeFees {
+		fees = uint64(feesForProofs(selectedProofs, mint))
+	}
+	totalAmount := amount + fees
+
+	// Check if we have exact amount
+	if selectedProofs.Amount() == totalAmount {
+		for _, proof := range selectedProofs {
+			w.db.DeleteProof(proof.Secret)
+		}
+		return selectedProofs, nil
+	}
+
+	// If overpayment is allowed and we have more than needed
+	if options.AllowOverpayment && selectedProofs.Amount() > totalAmount {
+		overpayment := selectedProofs.Amount() - totalAmount
+
+		// Check overpayment limits
+		if options.MaxOverpaymentAbsolute > 0 && overpayment > options.MaxOverpaymentAbsolute {
+			return nil, fmt.Errorf("overpayment of %d sats exceeds maximum allowed %d sats",
+				overpayment, options.MaxOverpaymentAbsolute)
+		}
+
+		if options.MaxOverpaymentPercent > 0 {
+			maxOverpayment := (amount * uint64(options.MaxOverpaymentPercent)) / 100
+			if overpayment > maxOverpayment {
+				return nil, fmt.Errorf("overpayment of %d sats exceeds maximum allowed %d%% (%d sats)",
+					overpayment, options.MaxOverpaymentPercent, maxOverpayment)
+			}
+		}
+
+		// Overpayment is acceptable, use these proofs
+		for _, proof := range selectedProofs {
+			w.db.DeleteProof(proof.Secret)
+		}
+		return selectedProofs, nil
+	}
+
+	// If offline and overpayment not allowed or not enough funds, try swap
+	proofsToSend, err := w.swapToSend(amount, mint, nil, options.IncludeFees)
+	if err != nil {
+		if isNetworkError(err) {
+			if options.AllowOverpayment {
+				return nil, fmt.Errorf("cannot create exact change offline and overpayment limits exceeded")
+			} else {
+				return nil, fmt.Errorf("cannot create exact change offline - enable overpayment or go online: %v", err)
+			}
+		}
+		return nil, err
+	}
+
+	return proofsToSend, nil
+}
+
 // getProofsForAmount will return proofs from mint for the given amount.
 // It returns error if wallet does not have enough proofs to fulfill amount
 func (w *Wallet) getProofsForAmount(
@@ -1497,6 +1618,9 @@ func (w *Wallet) getProofsForAmount(
 	// if offline selection did not work, swap proofs to then send
 	proofsToSend, err := w.swapToSend(amount, mint, nil, includeFees)
 	if err != nil {
+		if isNetworkError(err) {
+			return nil, fmt.Errorf("cannot create exact change offline - network required for proof swapping: %v", err)
+		}
 		return nil, err
 	}
 
@@ -1807,6 +1931,10 @@ func (w *Wallet) loadWalletMints() (map[string]walletMint, error) {
 			if len(keyset.PublicKeys) == 0 {
 				publicKeys, err := GetKeysetKeys(keyset.MintURL, keyset.Id)
 				if err != nil {
+					if isNetworkError(err) {
+						// Skip this keyset when offline - it will be unusable until online
+						continue
+					}
 					return nil, err
 				}
 				keyset.PublicKeys = publicKeys

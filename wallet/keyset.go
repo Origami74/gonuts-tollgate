@@ -91,12 +91,16 @@ func (w *Wallet) getActiveKeyset(mintURL string) (*crypto.WalletKeyset, error) {
 		return activeKeyset, nil
 	}
 
+	activeKeyset := mint.activeKeyset
+
 	allKeysets, err := client.GetAllKeysets(mintURL)
 	if err != nil {
+		if isNetworkError(err) {
+			// Use cached keyset when offline
+			return &activeKeyset, nil
+		}
 		return nil, err
 	}
-
-	activeKeyset := mint.activeKeyset
 	var activeInputFeePpk uint
 	// check if there is new active keyset
 	activeChanged := true
