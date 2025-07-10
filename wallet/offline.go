@@ -1,6 +1,7 @@
 package wallet
 
 import (
+	"fmt"
 	"net"
 	"net/url"
 	"strings"
@@ -23,6 +24,9 @@ func isNetworkError(err error) bool {
 		"i/o timeout",
 		"no route to host",
 		"connection reset by peer",
+		"server misbehaving",
+		"dial tcp",
+		"lookup",
 	}
 
 	for _, netErr := range networkErrors {
@@ -77,4 +81,23 @@ func extractHost(mintURL string) string {
 	}
 
 	return host
+}
+
+// wrapNetworkError creates a user-friendly error message for network issues
+func wrapNetworkError(err error, operation string) error {
+	if err == nil {
+		return nil
+	}
+
+	if !isNetworkError(err) {
+		return err
+	}
+
+	// Create informative error message for users
+	return fmt.Errorf("network connection issue during %s: %v\n"+
+		"This may indicate:\n"+
+		"- Internet connection is down\n"+
+		"- DNS resolution problems\n"+
+		"- Mint server is unreachable\n"+
+		"Consider enabling offline mode or checking your connection", operation, err)
 }

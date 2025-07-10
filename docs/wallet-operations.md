@@ -9,7 +9,7 @@ This document provides comprehensive documentation for wallet operations in the 
 ### Basic Configuration
 
 ```go
-import "github.com/elnosh/gonuts/wallet"
+import "github.com/Origami74/gonuts-tollgate/wallet"
 
 config := wallet.Config{
     WalletPath:     "./wallet-data",        // Local storage path

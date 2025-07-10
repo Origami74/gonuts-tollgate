@@ -5,9 +5,9 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/crypto"
-	"github.com/elnosh/gonuts/wallet/client"
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/crypto"
+	"github.com/Origami74/gonuts-tollgate/wallet/client"
 )
 
 // GetMintActiveKeyset gets the active keyset with the specified unit

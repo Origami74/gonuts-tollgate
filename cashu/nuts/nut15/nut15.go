@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/wallet/client"
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/wallet/client"
 )
 
 var (

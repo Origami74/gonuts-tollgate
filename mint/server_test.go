@@ -11,12 +11,12 @@ import (
 	"sort"
 	"testing"
 
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut01"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut02"
+	"github.com/Origami74/gonuts-tollgate/crypto"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/cashu/nuts/nut01"
-	"github.com/elnosh/gonuts/cashu/nuts/nut02"
-	"github.com/elnosh/gonuts/crypto"
 	"github.com/gorilla/mux"
 )
 

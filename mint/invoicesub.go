@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/elnosh/gonuts/cashu/nuts/nut04"
-	"github.com/elnosh/gonuts/mint/lightning"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut04"
+	"github.com/Origami74/gonuts-tollgate/mint/lightning"
 )
 
 // checkInvoicePaid should be called in a different goroutine to check in the background

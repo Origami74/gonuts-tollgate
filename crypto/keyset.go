@@ -10,9 +10,9 @@ import (
 	"slices"
 	"sort"
 
+	"github.com/Origami74/gonuts-tollgate/cashu"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
-	"github.com/elnosh/gonuts/cashu"
 )
 
 const MAX_ORDER = 60

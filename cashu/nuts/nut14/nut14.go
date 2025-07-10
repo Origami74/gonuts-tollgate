@@ -8,11 +8,11 @@ import (
 	"slices"
 	"time"
 
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut10"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut11"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcec/v2/schnorr"
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/cashu/nuts/nut10"
-	"github.com/elnosh/gonuts/cashu/nuts/nut11"
 )
 
 const (

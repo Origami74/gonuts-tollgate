@@ -22,7 +22,7 @@ This directory contains comprehensive documentation for the Gonuts cashu library
 ## Quick Start
 
 ```go
-import "github.com/elnosh/gonuts/wallet"
+import "github.com/Origami74/gonuts-tollgate/wallet"
 
 // Initialize wallet
 config := wallet.Config{

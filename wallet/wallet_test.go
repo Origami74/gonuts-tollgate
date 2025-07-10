@@ -11,12 +11,12 @@ import (
 	"strconv"
 	"testing"
 
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/crypto"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/crypto"
 )
 
 func TestCreateBlindedMessages(t *testing.T) {

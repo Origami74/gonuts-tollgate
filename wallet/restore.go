@@ -7,15 +7,15 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut07"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut09"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut13"
+	"github.com/Origami74/gonuts-tollgate/crypto"
+	"github.com/Origami74/gonuts-tollgate/wallet/client"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/cashu/nuts/nut07"
-	"github.com/elnosh/gonuts/cashu/nuts/nut09"
-	"github.com/elnosh/gonuts/cashu/nuts/nut13"
-	"github.com/elnosh/gonuts/crypto"
-	"github.com/elnosh/gonuts/wallet/client"
 	"github.com/tyler-smith/go-bip39"
 )
 

@@ -1,10 +1,10 @@
 package storage
 
 import (
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut04"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut05"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/cashu/nuts/nut04"
-	"github.com/elnosh/gonuts/cashu/nuts/nut05"
 )
 
 type MintDB interface {

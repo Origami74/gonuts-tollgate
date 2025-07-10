@@ -27,7 +27,7 @@ This directory contains practical examples demonstrating how to use the Gonuts l
 Make sure you have Go installed and the Gonuts library:
 
 ```bash
-go get github.com/elnosh/gonuts
+go get github.com/Origami74/gonuts-tollgate
 ```
 
 ### Basic Usage
@@ -54,8 +54,8 @@ import (
     "fmt"
     "log"
     
-    "github.com/elnosh/gonuts/wallet"
-    "github.com/elnosh/gonuts/cashu"
+    "github.com/Origami74/gonuts-tollgate/wallet"
+    "github.com/Origami74/gonuts-tollgate/cashu"
 )
 
 func main() {
@@ -202,8 +202,8 @@ import (
     "fmt"
     "log"
     
-    "github.com/elnosh/gonuts/wallet"
-    "github.com/elnosh/gonuts/cashu"
+    "github.com/Origami74/gonuts-tollgate/wallet"
+    "github.com/Origami74/gonuts-tollgate/cashu"
 )
 
 func main() {

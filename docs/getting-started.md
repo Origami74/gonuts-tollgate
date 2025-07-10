@@ -11,7 +11,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/elnosh/gonuts
+git clone https://github.com/Origami74/gonuts-tollgate
 cd gonuts
 
 # Install the wallet CLI
@@ -25,7 +25,7 @@ go install ./cmd/mint/
 
 ```bash
 # Add to your Go module
-go get github.com/elnosh/gonuts
+go get github.com/Origami74/gonuts-tollgate
 ```
 
 ## Quick Start
@@ -41,7 +41,7 @@ import (
     "fmt"
     "log"
     
-    "github.com/elnosh/gonuts/wallet"
+    "github.com/Origami74/gonuts-tollgate/wallet"
 )
 
 func main() {
@@ -149,7 +149,7 @@ if quoteState.State == nut04.Paid {
 ### Sending Ecash
 
 ```go
-import "github.com/elnosh/gonuts/cashu"
+import "github.com/Origami74/gonuts-tollgate/cashu"
 
 // Create tokens to send
 amount := uint64(500)
@@ -237,9 +237,9 @@ import (
     "log"
     "time"
     
-    "github.com/elnosh/gonuts/cashu"
-    "github.com/elnosh/gonuts/cashu/nuts/nut04"
-    "github.com/elnosh/gonuts/wallet"
+    "github.com/Origami74/gonuts-tollgate/cashu"
+    "github.com/Origami74/gonuts-tollgate/cashu/nuts/nut04"
+    "github.com/Origami74/gonuts-tollgate/wallet"
 )
 
 func main() {
@@ -329,7 +329,7 @@ For development and testing, you can run a local mint:
 
 ```bash
 # Clone the repository
-git clone https://github.com/elnosh/gonuts
+git clone https://github.com/Origami74/gonuts-tollgate
 cd gonuts
 
 # Set up environment

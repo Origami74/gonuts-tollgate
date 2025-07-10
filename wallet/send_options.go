@@ -1,6 +1,6 @@
 package wallet
 
-import "github.com/elnosh/gonuts/cashu"
+import "github.com/Origami74/gonuts-tollgate/cashu"
 
 // SendOptions provides configuration for send operations
 type SendOptions struct {

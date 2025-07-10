@@ -1,4 +1,4 @@
-[![Go Reference](https://pkg.go.dev/badge/github.com/elnosh/gonuts.svg)](https://pkg.go.dev/github.com/elnosh/gonuts) 
+[![Go Reference](https://pkg.go.dev/badge/github.com/Origami74/gonuts-tollgate.svg)](https://pkg.go.dev/github.com/Origami74/gonuts-tollgate) 
 
 _Disclaimer: The author is NOT a cryptographer and this work has not been reviewed. This means that there is very likely a fatal flaw somewhere. Cashu is still experimental and not production-ready._
 
@@ -40,7 +40,7 @@ Implemented [NUTs](https://github.com/cashubtc/nuts/):
 With [Go](https://go.dev/doc/install) installed, you can run the following command to install the wallet:
 
 ```
-git clone https://github.com/elnosh/gonuts
+git clone https://github.com/Origami74/gonuts-tollgate
 cd gonuts
 go install ./cmd/nutw/
 ```

@@ -7,7 +7,7 @@ This document provides comprehensive API documentation for the Gonuts library, c
 ## Package Structure
 
 ```
-github.com/elnosh/gonuts/
+github.com/Origami74/gonuts-tollgate/
 ├── cashu/          # Core protocol types
 ├── crypto/         # Cryptographic operations
 ├── wallet/         # Wallet operations

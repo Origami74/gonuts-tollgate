@@ -248,8 +248,8 @@ import (
     "fmt"
     "log"
     
-    "github.com/elnosh/gonuts/cashu"
-    "github.com/elnosh/gonuts/wallet"
+    "github.com/Origami74/gonuts-tollgate/cashu"
+    "github.com/Origami74/gonuts-tollgate/wallet"
 )
 
 func main() {

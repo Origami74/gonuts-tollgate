@@ -3,9 +3,9 @@ package nut12
 import (
 	"encoding/hex"
 
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/crypto"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/crypto"
 )
 
 // VerifyProofsDLEQ will verify the DLEQ proofs if present. If the DLEQ proofs are not present

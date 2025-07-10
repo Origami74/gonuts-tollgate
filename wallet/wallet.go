@@ -14,25 +14,25 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Origami74/gonuts-tollgate/cashu"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut03"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut04"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut05"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut07"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut10"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut11"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut12"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut13"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut14"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut15"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut20"
+	"github.com/Origami74/gonuts-tollgate/crypto"
+	"github.com/Origami74/gonuts-tollgate/wallet/client"
+	"github.com/Origami74/gonuts-tollgate/wallet/storage"
 	"github.com/btcsuite/btcd/btcec/v2"
 	"github.com/btcsuite/btcd/btcutil/hdkeychain"
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/decred/dcrd/dcrec/secp256k1/v4"
-	"github.com/elnosh/gonuts/cashu"
-	"github.com/elnosh/gonuts/cashu/nuts/nut03"
-	"github.com/elnosh/gonuts/cashu/nuts/nut04"
-	"github.com/elnosh/gonuts/cashu/nuts/nut05"
-	"github.com/elnosh/gonuts/cashu/nuts/nut07"
-	"github.com/elnosh/gonuts/cashu/nuts/nut10"
-	"github.com/elnosh/gonuts/cashu/nuts/nut11"
-	"github.com/elnosh/gonuts/cashu/nuts/nut12"
-	"github.com/elnosh/gonuts/cashu/nuts/nut13"
-	"github.com/elnosh/gonuts/cashu/nuts/nut14"
-	"github.com/elnosh/gonuts/cashu/nuts/nut15"
-	"github.com/elnosh/gonuts/cashu/nuts/nut20"
-	"github.com/elnosh/gonuts/crypto"
-	"github.com/elnosh/gonuts/wallet/client"
-	"github.com/elnosh/gonuts/wallet/storage"
 	"github.com/tyler-smith/go-bip39"
 
 	decodepay "github.com/nbd-wtf/ln-decodepay"
@@ -140,8 +140,9 @@ func LoadWallet(config Config) (*Wallet, error) {
 		_, err := wallet.AddMint(mintURL)
 		if err != nil {
 			if isNetworkError(err) {
-				// Cannot add new mint offline - this is expected
-				// The mint will be added when back online
+				// Inform user about network issue but continue with offline mode
+				wrappedErr := wrapNetworkError(err, "adding new mint")
+				fmt.Printf("Warning: %v\nContinuing in offline mode with existing mints only.\n\n", wrappedErr)
 				return wallet, nil
 			}
 			return nil, fmt.Errorf("error adding new mint: %v", err)
@@ -151,7 +152,9 @@ func LoadWallet(config Config) (*Wallet, error) {
 		_, err := wallet.getActiveKeyset(mintURL)
 		if err != nil {
 			if isNetworkError(err) {
-				// Cannot check keyset updates offline - continue with cached data
+				// Inform user about network issue but continue with cached data
+				wrappedErr := wrapNetworkError(err, "checking keyset updates")
+				fmt.Printf("Warning: %v\nContinuing with cached keysets.\n\n", wrappedErr)
 				return wallet, nil
 			}
 			return nil, err
@@ -177,7 +180,7 @@ func (w *Wallet) AddMint(mint string) (*walletMint, error) {
 	activeKeyset, err := GetMintActiveKeyset(mintURL, w.unit)
 	if err != nil {
 		if isNetworkError(err) {
-			return nil, fmt.Errorf("cannot add new mint while offline: %v", err)
+			return nil, wrapNetworkError(err, "fetching active keyset from mint")
 		}
 		return nil, err
 	}
@@ -185,7 +188,7 @@ func (w *Wallet) AddMint(mint string) (*walletMint, error) {
 	inactiveKeysets, err := GetMintInactiveKeysets(mintURL, w.unit)
 	if err != nil {
 		if isNetworkError(err) {
-			return nil, fmt.Errorf("cannot fetch inactive keysets while offline: %v", err)
+			return nil, wrapNetworkError(err, "fetching inactive keysets from mint")
 		}
 		return nil, err
 	}
@@ -1619,7 +1622,8 @@ func (w *Wallet) getProofsForAmount(
 	proofsToSend, err := w.swapToSend(amount, mint, nil, includeFees)
 	if err != nil {
 		if isNetworkError(err) {
-			return nil, fmt.Errorf("cannot create exact change offline - network required for proof swapping: %v", err)
+			wrappedErr := wrapNetworkError(err, "creating exact change (proof swapping)")
+			return nil, fmt.Errorf("cannot create exact change offline. %v\nConsider using SendOffline() to allow overpayment", wrappedErr)
 		}
 		return nil, err
 	}
@@ -1932,7 +1936,9 @@ func (w *Wallet) loadWalletMints() (map[string]walletMint, error) {
 				publicKeys, err := GetKeysetKeys(keyset.MintURL, keyset.Id)
 				if err != nil {
 					if isNetworkError(err) {
-						// Skip this keyset when offline - it will be unusable until online
+						// Inform user about network issue and skip this keyset
+						wrappedErr := wrapNetworkError(err, fmt.Sprintf("loading keyset %s from %s", keyset.Id, keyset.MintURL))
+						fmt.Printf("Warning: %v\nSkipping keyset %s until connection is restored.\n\n", wrappedErr, keyset.Id)
 						continue
 					}
 					return nil, err

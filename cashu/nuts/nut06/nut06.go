@@ -6,7 +6,7 @@ package nut06
 import (
 	"encoding/json"
 
-	"github.com/elnosh/gonuts/cashu/nuts/nut17"
+	"github.com/Origami74/gonuts-tollgate/cashu/nuts/nut17"
 )
 
 type MintInfo struct {
