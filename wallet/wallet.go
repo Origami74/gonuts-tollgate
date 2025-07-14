@@ -1550,7 +1550,16 @@ func (w *Wallet) getProofsForAmountWithOptions(
 		return selectedProofs, nil
 	}
 
-	// If overpayment is allowed and we have more than needed
+	// First try to swap tokens to get exact change
+	proofsToSend, err := w.swapToSend(amount, mint, nil, options.IncludeFees)
+	if err == nil {
+		return proofsToSend, nil
+	}
+
+	if !isNetworkError(err) {
+		return nil, err
+	}
+	// If network error during swap, fall back to overpayment if allowed
 	if options.AllowOverpayment && selectedProofs.Amount() > totalAmount {
 		overpayment := selectedProofs.Amount() - totalAmount
 
@@ -1573,22 +1582,10 @@ func (w *Wallet) getProofsForAmountWithOptions(
 			w.db.DeleteProof(proof.Secret)
 		}
 		return selectedProofs, nil
+	} else {
+		wrappedErr := wrapNetworkError(err, "creating exact change (proof swapping)")
+		return nil, fmt.Errorf("cannot create exact change offline. %v\nConsider using SendOffline() to allow overpayment", wrappedErr)
 	}
-
-	// If offline and overpayment not allowed or not enough funds, try swap
-	proofsToSend, err := w.swapToSend(amount, mint, nil, options.IncludeFees)
-	if err != nil {
-		if isNetworkError(err) {
-			if options.AllowOverpayment {
-				return nil, fmt.Errorf("cannot create exact change offline and overpayment limits exceeded")
-			} else {
-				return nil, fmt.Errorf("cannot create exact change offline - enable overpayment or go online: %v", err)
-			}
-		}
-		return nil, err
-	}
-
-	return proofsToSend, nil
 }
 
 // getProofsForAmount will return proofs from mint for the given amount.
